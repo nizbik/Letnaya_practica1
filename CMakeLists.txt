@@ -4,7 +4,7 @@
  
 
 cmake_minimum_required(VERSION 3.10)
-project(letmaya_practica_1 C)
+project(letnaya_practica_1 C)
 
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
