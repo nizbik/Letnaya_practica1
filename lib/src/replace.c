@@ -25,12 +25,12 @@ static void write_from_circular(FILE* fout, unsigned char* buf,
     }
 }
 
-static int find_pattern(unsigned char* buf, long long abs_start, int count,
+static int find_pattern(unsigned char* buf, long long start_pos, int count,
                         const unsigned char* pattern, int pattern_len, int max_offset) {
     for (int i = 0; i <= max_offset; ++i) {
         int match = 1;
         for (int j = 0; j < pattern_len; ++j) {
-            if (buf[(abs_start + i + j) % BUF_CAPACITY] != pattern[j]) {
+            if (buf[(start_pos + i + j) % BUF_CAPACITY] != pattern[j]) {
                 match = 0;
                 break;
             }
@@ -60,8 +60,8 @@ int replace_in_file(const char* in_path, const char* out_path,
         return -1;
     }
 
-    long long abs_start = 0;
-    int count = 0;
+    long long abs_start = 0; 
+    int count = 0;           
 
     while (1) {
         int pos = (abs_start + count) % BUF_CAPACITY;
@@ -69,30 +69,44 @@ int replace_in_file(const char* in_path, const char* out_path,
         count += bytes_read;
         int is_eof = (bytes_read < N);
 
-    
-        int safe_limit = count;
+       
+        int safe_limit;
+        if (is_eof) {
+            safe_limit = abs_start + count;
+        } else {
+            safe_limit = abs_start + count - (2 * N - 1);
+            if (safe_limit < abs_start) safe_limit = abs_start;
+        }
 
-        int search_offset = 0;
-        while (search_offset <= safe_limit - pattern_len) {
-            int max_search = safe_limit - pattern_len;
-            int match_offset = find_pattern(buf, abs_start, count,
+       
+        int processed = 0;
+
+        while (abs_start + processed < safe_limit) {
+            int remaining = safe_limit - abs_start - processed;
+            int max_search = remaining - pattern_len;
+            if (max_search < 0) max_search = 0;
+
+            int match_offset = find_pattern(buf, abs_start + processed,
+                                            count - processed,
                                             pattern, pattern_len, max_search);
 
             if (match_offset == -1) {
-                write_from_circular(fout, buf, abs_start + search_offset,
-                                    safe_limit - search_offset);
-                abs_start += safe_limit;
-                count -= safe_limit;
-                search_offset = safe_limit;
+
+                write_from_circular(fout, buf, abs_start + processed, remaining);
+                abs_start += remaining;
+                count -= remaining;
+                processed = 0;
             } else {
-                write_from_circular(fout, buf, abs_start + search_offset,
-                                    match_offset - search_offset);
+                
+                write_from_circular(fout, buf, abs_start + processed, match_offset);
+             
                 fwrite(replacement, 1, replacement_len, fout);
 
-                int advance = match_offset - search_offset + pattern_len;
+             
+                int advance = match_offset + pattern_len;
                 abs_start += advance;
                 count -= advance;
-                search_offset += advance;
+                processed = 0; 
             }
         }
 
