@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define BUF_CAPACITY (3 * N)
 
 static void write_from_circular(FILE* fout, unsigned char* buf, long long abs_start, int len, int buf_capacity) {
     if (len <= 0) return;
