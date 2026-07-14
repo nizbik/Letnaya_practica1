@@ -12,7 +12,7 @@
 После сборки исполняемый файл letmaya_practica_1.exe находится в каталоге build\app\Release (или build\app\Debug).
 
 Синтаксис запуска:
-> build\app\Release\letmaya_practica_1.exe <входной_файл> <выходной_файл> <паттерн_HEX> <замена_HEX>
+> build\app\Release\letnaya_practica_1.exe <входной_файл> <выходной_файл> <паттерн_HEX> <замена_HEX>
 
 Пример (замена "ad" на "12345"):
-> build\app\Release\letmaya_practica_1.exe input.txt output.txt 6164 3132333435
+> build\app\Release\letnaya_practica_1.exe input.txt output.txt 6164 3132333435
