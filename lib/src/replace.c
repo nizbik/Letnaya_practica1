@@ -1,12 +1,11 @@
 /*
- * Реализация алгоритма замены с использованием кольцевого буфера.
- * Зубехин Никита
- * МК-101
- */
+Реализация алгоритма замены с использованием кольцевого буфера.
+Зубехин Никита
+МК-101
+*/
 #include "replace.h"
 #include <stdio.h>
 #include <stdlib.h>
-
 
 static void write_from_circular(FILE* fout, unsigned char* buf, long long abs_start, int len, int buf_capacity) {
     if (len <= 0) return;
@@ -58,7 +57,20 @@ int replace_in_file(const char* in_path, const char* out_path, const unsigned ch
 
     while (1) {
         int pos = (abs_start + count) % buf_capacity;
-        size_t bytes_read = fread(buf + pos, 1, N, fin);
+        
+        int space_to_end = buf_capacity - pos;
+        size_t bytes_read;
+        if (space_to_end >= N) {
+            bytes_read = fread(buf + pos, 1, N, fin);
+        } else {
+            size_t read1 = fread(buf + pos, 1, space_to_end, fin);
+            size_t read2 = 0;
+            if (read1 == (size_t)space_to_end) {
+                read2 = fread(buf, 1, N - space_to_end, fin);
+            }
+            bytes_read = read1 + read2;
+        }
+        
         count += bytes_read;
         int is_eof = (bytes_read < N);
 
